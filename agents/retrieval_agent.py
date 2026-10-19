@@ -3,6 +3,10 @@ Real, already-validated retrieval agent (same code tested earlier this
 session against the shared vector-search-lesson OpenSearch domain).
 Recreated here after the local Downloads reset wiped the original files.
 """
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import boto3
 from opensearchpy import OpenSearch, RequestsHttpConnection
 from requests_aws4auth import AWS4Auth
@@ -10,8 +14,11 @@ from sentence_transformers import SentenceTransformer
 from bedrock_client import invoke_claude
 from agents import AgentResult
 
-HOST = "search-vector-search-lesson-a3enhrb4w4wuu2w5vv52whqu2q.us-east-1.es.amazonaws.com"
-REGION = "us-east-1"
+from dotenv import load_dotenv
+load_dotenv()
+
+HOST = os.getenv("OPENSEARCH_ENDPOINT", "search-vector-search-lesson-a3enhrb4w4wuu2w5vv52whqu2q.us-east-1.es.amazonaws.com")
+REGION = os.getenv("AWS_REGION", "us-east-1")
 
 _embed_model = None
 

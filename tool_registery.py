@@ -8,9 +8,13 @@ TOOL_REGISTRY = {
         "schema": {
             "name": "sql_agent",
             "description": (
-                "Query the relational database for structured data about clients, "
-                "projects, consultants, and invoices. Use for counts, budgets, "
-                "statuses, and billing questions."
+                "Use for questions that require querying the relational database: "
+                "counts, totals, filters, aggregations, and lookups against the "
+                "clients, projects, consultants, and invoices tables (e.g. 'How many "
+                "active projects?', 'What is the total budget for client X?'). "
+                "Do NOT use for policy questions, process descriptions, guidelines, "
+                "or any question whose answer lives in a document rather than a "
+                "database row."
             ),
             "input_schema": {
                 "type": "object",
@@ -24,9 +28,13 @@ TOOL_REGISTRY = {
         "schema": {
             "name": "retrieval_agent",
             "description": (
-                "Search indexed documents for policy, procedure, and case study "
-                "information. Use for questions about processes, guidelines, or "
-                "narrative content rather than structured data."
+                "Use for questions answered by searching indexed documents: policies, "
+                "procedures, onboarding guides, case studies, and narrative content "
+                "(e.g. 'What is our escalation policy?', 'How do we onboard new "
+                "clients?'). "
+                "Do NOT use for questions about specific records, numbers, counts, "
+                "budgets, statuses, or anything retrievable from the relational "
+                "database tables (clients, projects, consultants, invoices)."
             ),
             "input_schema": {
                 "type": "object",
@@ -45,17 +53,3 @@ def call_tool(tool_name: str, question: str) -> dict:
         return {"success": False, "answer": f"Unknown tool: {tool_name}", "sources": [], "metadata": {}}
     return TOOL_REGISTRY[tool_name]["function"](question)
 
-from tool_registry import call_tool, get_all_schemas
-
-print("Registered tools:", [s["name"] for s in get_all_schemas()])
-
-# Test each tool through the registry
-result1 = call_tool("sql_agent", "How many active projects do we have?")
-print(result1)
-
-result2 = call_tool("retrieval_agent", "What is our onboarding process?")
-print(result2)
-
-# Test unknown tool handling
-result3 = call_tool("nonexistent_tool", "test")
-print(result3)

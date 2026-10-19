@@ -11,7 +11,10 @@ lesson" is only true if this file actually calls validate_sql, same as
 shared-tool-registry-lab-solution's run_sql_agent does via
 validated_agent_solution.validated_sql_agent().
 """
+import sys
 import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import psycopg2
 from bedrock_client import invoke_claude
 from agents import AgentResult
