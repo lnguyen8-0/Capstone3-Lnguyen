@@ -129,3 +129,37 @@ Tokens: {'input': 510, 'output': 347}
 
 **Step 4 result: PASSED** — single-tool and multi-tool routing both work; synthesis attributes results to each agent.
 
+---
+
+## Validation Outputs for Bronze Step 5
+
+SQL validation is enforced in `execute_query_safely()` in `agents/sql_agent.py` — there is no path to the database that skips `validate_sql()`.
+
+Test suite run against `validate_sql()`:
+
+```
+[PASS] Valid SELECT
+       Query:    SELECT * FROM clients WHERE status = 'active'
+       Expected: ALLOW | Got: ALLOW | Reason: OK
+
+[PASS] Destructive DELETE
+       Query:    DELETE FROM clients WHERE id = 1
+       Expected: BLOCK | Got: BLOCK | Reason: Blocked: 'DELETE' is not permitted. Only SELECT queries are allowed.
+
+[PASS] Column named deleted_at
+       Query:    SELECT id, deleted_at FROM clients
+       Expected: ALLOW | Got: ALLOW | Reason: OK
+
+[PASS] Stacked with blocked keyword
+       Query:    SELECT * FROM clients; DROP TABLE clients
+       Expected: BLOCK | Got: BLOCK | Reason: Blocked: 'DROP' is not permitted. Only SELECT queries are allowed.
+
+[PASS] Stacked two SELECTs
+       Query:    SELECT * FROM clients; SELECT * FROM projects
+       Expected: BLOCK | Got: BLOCK | Reason: Blocked: multiple statements detected (possible stacked query attempt).
+
+All tests passed!
+```
+
+**Step 5 result: PASSED** — all 5 required cases pass, including whole-word matching (case 3) and independent stacking check (case 5).
+
