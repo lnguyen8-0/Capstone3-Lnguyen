@@ -163,3 +163,34 @@ All tests passed!
 
 **Step 5 result: PASSED** — all 5 required cases pass, including whole-word matching (case 3) and independent stacking check (case 5).
 
+---
+
+## Validation Outputs for Bronze Step 6
+
+Every Claude call is logged with input tokens, output tokens, and USD cost. Pricing used: Claude Sonnet 4.6 on Amazon Bedrock — $3.00/1M input tokens, $15.00/1M output tokens.
+
+Run `python3 run_tokenomics_test.py` to reproduce.
+
+```
+#   Route          SQL in/out   Ret in/out   Synth in/out    Total $
+----------------------------------------------------------------------
+1   sql                257/40          -/-         104/67  $0.002688
+2   both               252/39      3054/52        209/144  $0.014070
+3   retrieval             -/-      3060/59        170/173  $0.013170
+4   sql               264/175          -/-        232/203  $0.007158
+5   sql               393/282          -/-        346/330  $0.011397
+6   retrieval             -/-     3603/176        287/253  $0.018105
+7   retrieval             -/-     3603/299        410/357  $0.021879
+8   both              273/215      3611/61        409/354  $0.022329
+9   both              277/153     3109/299        579/376  $0.024315
+10  both              263/220     3611/114        460/352  $0.023292
+----------------------------------------------------------------------
+                                          GRAND TOTAL  $0.158403
+
+Highest-cost component: retrieval ($0.086853)
+```
+
+The retrieval component is the most expensive because it sends large document chunks as context to Claude on every call.
+
+**Step 6 result: PASSED** — every Claude call logged with tokens and USD cost; 10-query summary shows total cost and highest-cost component.
+
