@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import boto3
 from opensearchpy import OpenSearch, RequestsHttpConnection
 from requests_aws4auth import AWS4Auth
-from sentence_transformers import SentenceTransformer
+from onnx_embed import get_embedding
 from bedrock_client import invoke_claude
 from agents import AgentResult
 
@@ -19,15 +19,6 @@ load_dotenv()
 
 HOST = os.getenv("OPENSEARCH_ENDPOINT", "search-vector-search-lesson-a3enhrb4w4wuu2w5vv52whqu2q.us-east-1.es.amazonaws.com")
 REGION = os.getenv("AWS_REGION", "us-east-1")
-
-_embed_model = None
-
-
-def get_embedding(text: str) -> list[float]:
-    global _embed_model
-    if _embed_model is None:
-        _embed_model = SentenceTransformer("all-MiniLM-L6-v2")
-    return _embed_model.encode(text).tolist()
 
 
 def get_opensearch_client():

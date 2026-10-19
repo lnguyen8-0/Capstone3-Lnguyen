@@ -216,3 +216,56 @@ Run `python3 test_suite.py` to reproduce.
 
 **Step 7 result: PASSED** — all 8 questions documented; unsafe SQL blocked; unanswerable question declined honestly.
 
+---
+
+## Validation Outputs for Bronze Step 8
+
+### Deployment
+
+- **Function name:** `orchestrator-ln`
+- **Runtime:** Python 3.12
+- **Region:** us-east-1
+- **S3 package:** `s3://orchestrator-bucket-ln/orchestrator.zip` (87MB zipped, 215MB unzipped)
+- **Package approach:** All dependencies bundled in zip (no layers, no container image). ONNX Runtime used for embeddings instead of sentence-transformers to stay under 250MB Lambda limit.
+- **IAM role:** `orchestrator-lambda-role-ln` with inline Bedrock + OpenSearch + STS policies
+
+### Invocation command
+
+```bash
+aws lambda invoke \
+  --function-name orchestrator-ln \
+  --payload '{"body": "{\"question\": \"How many active projects do we have, and what is our onboarding process?\"}"}' \
+  --cli-binary-format raw-in-base64-out \
+  response.json
+```
+
+### response.json
+
+```json
+{
+  "statusCode": 200,
+  "body": {
+    "route": "both",
+    "sql_validation": "PASSED",
+    "token_usage": {"input": 432, "output": 334},
+    "answer": "You currently have 4 active projects (SQL Agent, projects table). Onboarding process from Capstone2_Company.pdf: customer success owner builds plan covering objectives, stakeholders, milestones, training, success measures, escalation paths."
+  }
+}
+```
+
+### CloudWatch log lines (last successful invocation)
+
+```
+START RequestId: 3f29daaa-5e4e-4ad7-8de9-b5f2f7f21e5b Version: $LATEST
+[LOG] query_start: {"trace_id": "68f50cad"}
+--- Token usage for: How many active projects do we have, and what is our onboard ---
+  sql           in=  275  out=  164  cost=$0.003285
+  retrieval     in= 3612  out=  134  cost=$0.012846
+  synthesis     in=  432  out=  334  cost=$0.006306
+  TOTAL         in= 4319  out=  632  cost=$0.022437
+[LOG] query_complete: {"trace_id": "68f50cad", "route": "both", "sql_validation": "PASSED", ...}
+REPORT RequestId: 3f29daaa  Duration: 9485.43 ms  Memory Size: 512 MB  Max Memory Used: 287 MB
+```
+
+**Step 8 result: PASSED** — orchestrator deployed and invoked on Lambda; response shows `route: both`, `sql_validation: PASSED`, combined answer from both agents, and non-zero `token_usage`.
+
