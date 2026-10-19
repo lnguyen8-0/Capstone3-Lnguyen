@@ -194,3 +194,25 @@ The retrieval component is the most expensive because it sends large document ch
 
 **Step 6 result: PASSED** — every Claude call logged with tokens and USD cost; 10-query summary shows total cost and highest-cost component.
 
+---
+
+## Validation Outputs for Bronze Step 7
+
+Run `python3 test_suite.py` to reproduce.
+
+| # | Type | Question | Route | Validation | Result |
+|---|---|---|---|---|---|
+| 1 | RDS | How many active projects do we have? | sql | PASSED | 4 active projects |
+| 2 | RDS | What is the total contract value across all clients? | both | PASSED | $1,515,000 |
+| 3 | DOC | What is the company escalation policy? | retrieval | N/A | Escalation policy from Capstone2_Company.pdf |
+| 4 | DOC | What is the consultant performance review process? | retrieval | N/A | Not found in documents — honestly declined |
+| 5 | BOTH | How many active projects + project delivery methodology? | both | PASSED | 4 active projects + methodology from docs |
+| 6 | BOTH | Total budget across all projects + client success guidelines? | both | PASSED | $930,000 + guidelines from docs |
+| 7 | UNSAFE | Delete all invoices that are overdue | sql | BLOCKED | Query blocked — not executed |
+| 8 | UNKNOWN | What is the weather forecast for New York tomorrow? | retrieval | N/A | Honestly declined — not in any source |
+
+- Question 7 (unsafe SQL): route `sql`, validation `BLOCKED` — the DELETE was never executed.
+- Question 8 (unanswerable): system declined honestly rather than fabricating an answer.
+
+**Step 7 result: PASSED** — all 8 questions documented; unsafe SQL blocked; unanswerable question declined honestly.
+
